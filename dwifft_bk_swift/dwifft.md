@@ -5,32 +5,26 @@
 
 # 2013
 
-^ Only iOS developer at Grouper (an online dating site)
+^ Let's go back to 2013.
+^ I was the iOS developer at Grouper. This was an app where you and two of your friends would be set up on a blind date with three strangers for drinks.
 ^ Just finished our migration to iOS 7
-^ I am in over my head
-^ I had to read a bunch of my code from 3 years ago as part of writing this talk, so take pity on me
+^ I want to build all the things.
 
 ---
 
 ![inline](images/grouper.png)
 
-^ I was trying to make a chat feature, trying to make it really good
-
----
-
-- `UITableView`
-- `DAKeyboardControl`
-- Core Data?
-
-^ Ok, so what did it take to build a screen like that?
+^ So you can imagine with that blind dating setup, things went horribly wrong all the time. So we had this screen where you could chat with one of our support folks. I actually had to look around pretty hard to find a screenshot of the app - I actually got this off an old techcrunch article. Anyway, the new fancy iOS 7 messages app had just come out, and I wanted to make this screen really really nice.
 
 ---
 
 ```swift
-tableViwe.reloadData() // amateur hour
+tableView.reloadData() // amateur hour
 ```
 
-^ you want animated changes.
+![inline](images/stuff.gif)
+
+^ One part of that was that I wanted to have nice animated transitions as new messages came in, like in this gif. I didn't want to just call reloadData on the table view, because that can be jarring - it makes you lose your scroll position, for example.
 
 ---
 
@@ -43,7 +37,7 @@ func insertRows(
 )
 ```
 
-^ But how do you figure out the index paths?
+^ So, to do that, UITableView has these APIs where you can animatedly insert rows. Unfortunately, in order to do this, you need to explicitly tell it what index paths you want to modify. Usually, you don't really have this information directly available - it'd more be like, OK, I got these new results back from the network and I want them to show up in the table, now what?
 
 ---
 
@@ -59,27 +53,29 @@ func controller(
 )
 ```
 
-^ Turns out this function is perfectly matched up with the UITableView APIs! No problem, I thought - I'll just spin up a core data stack, dump new messages in there, and then retrieve them with my fetched results controller! (It's worth noting, this was my first time using Core Data.)
+^ So, 2013 me is trying to figure this out, and 2013 me learns about Core Data? As it turns out, NSFetchedResultsControllerDelegate has a really nice API that lines up really well with UITableView. You get these callbacks when your object store changes, and they figure out the index paths for you.
+^ That's awesome, I thought, in my infinite 23-year-old optimism - I'll just spin up a core data stack, dump new messages in there, and then retrieve them with my fetched results controller! (It's worth noting, this was my first time using Core Data.)
 
 ---
 
 ## "Now you have two problems"
 
-^ So, a few thousand crashes later, I ended up pulling this code from the App Store in an emergency update, and just going back to calling reloadData when new messages came in. I wish I knew what the crash was today, but at the time it was basically "horrifying core data stacktrace", and I didn't have time to figure it out, and of course it was no big deal and none of this was worth the energy in the first place.
+^ So, a few thousand crashes later, I ended up pulling this code from the App Store in an emergency update, and just going back to calling reloadData when new messages came in. I wish I knew what the crash was today - it was some kind of multithreading issue, I remember - but at the time it was basically "horrifying core data stacktrace", and I didn't have time to figure it out, and of course it was no big deal and none of this was worth the energy in the first place.
 
 ---
 
 # 2015
-^ Fast forward to 2015. I'm on a plane from new york to SF, visiting my new job. I've been pretending that I know how to write Swift for about a year, and it's becoming increasingly difficult, so I decide that I'm just going to spend the flight looking up random algorithms on the internet and trying to implement them in a Swift playground. I know how to party when I fly.
+^ Fast forward to 2015. I'm on a plane from new york to SF, visiting my colleagues at my new job at Stripe. I've been pretending that I know Swift for about a year, and it's becoming increasingly obvious to my coworkers that I don't know what I'm doing, so I decide that I'm just going to spend the flight looking up random algorithms on the internet and trying to implement them in a Swift playground. Party flight.
 
 ---
 
-## Longest Common Subsequence
+# LCS
+### (Longest Common Subsequence)
 
-## SM**AR**T**P**H**ON**E
-## H**ARPO**O**N**
+## **SM**AR**T**P**H**ON**E**
+## **H**ARPO**O****N**
 
-^ So one of the algorithms I picked was called the Longest Common Subsequence problem. The problem states, given two sequences of values, find the longest not-necessarily-contiguous subsequence that they both share. So, for example, if our two inputs are SMARTPHONE and HARPOON, the longest common subsequence is ARPON. I spent way too long trying to come up with a decent word pair to use here.
+^ So one of the algorithms I picked was called the Longest Common Subsequence problem, or LCS for short. The problem states, given two sequences of values, find the longest not-necessarily-contiguous subsequence that they both share. So, for example, if our two inputs are SMARTPHONE and HARPOON, the longest common subsequence is ARPON. I spent way too long trying to come up with a decent word pair to use here.
 
 ---
 
@@ -98,7 +94,10 @@ $$
 <br>
 `// I stole this from Wikipedia`
 
-^ So I have this ridiculous LaTEX formula that I stole from Wikipedia that actually isn't that bad when you break it down. LCS is a simple recursive function. You start at the back of both words, and advance two pointers backwards. If both pointers are pointing to the same letter, you add that letter to your LCS. If not, you try deleting the last letter of each word, call LCS again, and take the longer of the two.
+### **SM**AR**T**P**H**ON**E**
+### **H**ARPO**O****N**
+
+^ So to explain the LCS algorithm I have this ridiculous LaTEX formula that I stole from Wikipedia that actually isn't that bad when you break it down. LCS is a simple recursive function. You start at the back of both words, and advance two pointers backwards. If both pointers are pointing to the same letter, you add that letter to your LCS. If not, you try deleting the last letter of each word, call LCS again, and take the longer of the two, and you kind of chew down your words that way until they're both empty.
 
 ---
 
@@ -114,6 +113,8 @@ $$
 # Dwifft!
 ## (Swift Diff)
 
+^ At some point, I realized that I had inadvertently solved my problem from back in 2013. This simple diffing algorithm was all that I was missing. If I had had this, I wouldn't have had to rely on this ridiculous core data functionality to get my shiny tableview changes. So, I decided to turn it into a library, and Dwifft was born.
+
 ---
 ```swift
 enum DiffStep<T: Equatable> {
@@ -126,6 +127,8 @@ extension Array where Element: Equatable {
 }
 ```
 
+^ So Dwifft is really small - it's basically just two files. The first one is an implementation of the LCS and Diff algorithms described above. It defines an enum for those "edit transformations" I mentioned called a DiffStep, and then extends Arrays of Equatables to be able to diff themselves with arrays of the same type.
+
 ---
 
 ```swift
@@ -135,19 +138,24 @@ class TableViewDiffCalculator<T: Equatable> {
 }
 ```
 
+^ The second file contains adapters for UITableView and UICollectionView that I call "Diff calculators". You initialize them with a UITableView, and then whenever you set their `rows` property, it'll automatically diff it with its previous value, figure out the edit transformations, map those changes into index paths in your tableview, and then call all the necessary UITableView APIs to perform your animated changes automatically.
+
 ---
 
-![inline](images/stuff.gif)
-## Now what?
+# Now what?
 ### (Alternate slide title: Dwifft diff)
+
+^ OK, so now it's about a year and a half later - what's happening with Dwifft?
 
 ---
 
 # Vision
-## (Dwission? Ok, I'll stop)
-## https://www.stilldrinking.org/programming-sucks
+### (Alternate slide title: Dwission? Ok, I'll stop)
+### ‏‏
+### ‏‏
+### https://www.stilldrinking.org/programming-sucks
 
-^ I want to read you a passage from one of my favorite essays, titled "programming sucks."
+^ I want to read you a passage from a wonderful essay titled "programming sucks" by Peter Welch.
 
 ^ Every programmer occasionally, when nobody's home, turns off the lights, pours a glass of scotch, puts on some light German electronica, and opens up a file on their computer[...] They read over the lines, and weep at their beauty, then the tears turn bitter as they remember the rest of the files and the inevitable collapse of all that is good and true in the world.
 
@@ -157,27 +165,48 @@ class TableViewDiffCalculator<T: Equatable> {
 
 ---
 
-## In practice
+# In practice
 
-- simplest possible implementation (unix philosophy)
+![right, 150%](images/yells_at_cloud.jpeg)
+
+- Simplest possible implementation (unix philosophy)
 - 𝚫 -> 0
+- 100% documentation, test coverage
 - close most PRs
-- lots of tests
 - minimize dependencies
+
+^ So, what does that mean? It means that its featureset will not grow unnecessarily over time, and will ideally shrink. As it turns out, most pull requests people open are to add new convenience methods and stuff, which I unfortunately systematically close. This also sounds kind of obvious I guess, but I never ever want Dwifft to break. This implies writing lots of tests and making sure it's fully documented. As part of both of the above, it's essential that it have as few dependencies as possible - just ask all the people that depended on leftpad.js. So, the only dependency for 80% Dwifft is Swift itself - there's just a little bit that pulls in UIKit, and that's it. Obviously, no third-party dependencies. And, as curmudgeonly as I know I sound, the Swift dependency is actually really annoying - it sucks having to update the library with every new version of Swift.
 
 ---
 
 # Announcing Dwifft v0.6!
 
 ```swift
-class TableViewDiffCalculator<S: Equatable, T: Equatable> {
+class TableViewDiffCalculator<S, T> {
   var rows: [T] // deprecated!
   var sectionsAndRows: [(S, [T])] // THE FUTURE
 }
 ```
 
+^ So, to directly contradict what I just said, I actually have some exciting news - this week I'll be releasing Dwifft 0.6.
 ^ Yes, someday you'll tell your grandkids, I was there when Dwifft 0.6 was announced.
-^ Instead of just an array of rows, you now pass an array of tuples. But the magical thing is that now Dwifft will basically do a 2-dimensional diff on your array, and figure out the necessary section changes. You might be wondering, what's with that weird array of tuples thing. It's kind of awkward to write, but all it is is an ordered dictionary. This was originally just an array of arrays of T, but that had to change because sections themselves have meaning.
+^ I said the goal is the simplest implementation possible, and I think this new functionality is required for Dwifft to feel complete. The biggest change is that now instead of just diffing arrays, you can diff arrays of arrays. But the magical thing is that now Dwifft can use this to add and remove sections to your tableview or collectionview, not just rows. You might be wondering, what's with that weird array of tuples thing. It's kind of awkward to write, but all it is is an ordered dictionary. This was originally just an array of arrays of T, but that had to change because sections themselves have meaning - so, you might imagine a case where a section needs to be renamed, but none of its contents change.
+
+---
+
+```swift
+// Oh god no
+([[T]], [[T]]) ->
+(Tree<T>, Tree<T>) ->
+TreeDiff<T> ->
+ArrayDiff<T>
+
+// Yes yes yes
+([(S, [T])], [(S, [T])]) ->
+([RowOrSection<S, T>], [RowOrSection<S, T>]) ->
+ArrayDiff<S, T>
+```
+
 ^ This was a really interesting change - I had this massively complicated strategy for doing this that I was sort of planning for like a year. I was going to change the diff algorithm into a tree diffing algorithm, then write code to effectively transform a 2D array into a tree, so that we could do diffs of arbitrary depth. But that was going to be really hard. And then my friend Jeremy idly suggested over breakfast, why don't you just treat the section boundaries themselves like array elements? So, just flatten your 2D arrays of sections and rows into 1D arrays that contain some objects, and some "section placeholders". Then diff those 1D arrays. That, as it turns out, is totally doable, and how this works.
 
 ---
@@ -187,9 +216,18 @@ class TableViewDiffCalculator<S: Equatable, T: Equatable> {
 - ~~`sectionsAndRows`~~
 - Coalesce delete/insert operations into moves
 - macOS + tvOS targets
-- Quick tests
 - Swift ABI stability (ha ha)
+- (hopefully) done forever
+
+^ So, what is next? Ideally, it's just these three things: first, I'd like to support "move" operations in addition to insertions and deletes, which would probably mean taking an array of those DiffSteps and coalescing them into moves. This is because UICollectionView can have different animations for items being deleted/inserted instead of simply moving around.
+^ Next, I'd like to make sure this works on every relevant Apple platform, which includes macOS and tvOS (I'm not a watchKit expert, but I don't think it has any concept of animated table changes, but would love to hear if I'm wrong about that.)
+^ Then, ideally, Swift 4 would have ABI stability, so I could stop updating this library when new Swift versions come out, and then it can be done forever!
+
 
 ---
 
 # Thank you
+- @jflinter
+- Dwifft: github.com/jflinter/dwifft
+- This talk: github.com/jflinter/talks/tree/master/dwifft\_bk\_swift
+- Questions?
