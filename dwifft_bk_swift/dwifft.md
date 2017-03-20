@@ -1,10 +1,12 @@
 # Dwifft!
+## Birth, Maturity, Death
 ## March 15, 2017
 
 ---
 
-# 2013
+# Prelude: 2013
 
+^ But first, a tale of hubris and failure.
 ^ Let's go back to 2013.
 ^ I was the iOS developer at Grouper. This was an app where you and two of your friends would be set up on a blind date with three strangers for drinks.
 ^ Just finished our migration to iOS 7
@@ -110,7 +112,7 @@ $$
 
 ---
 
-# Dwifft!
+# Dwifft is born!
 ## (Swift Diff)
 
 ^ At some point, I realized that I had inadvertently solved my problem from back in 2013. This simple diffing algorithm was all that I was missing. If I had had this, I wouldn't have had to rely on this ridiculous core data functionality to get my shiny tableview changes. So, I decided to turn it into a library, and Dwifft was born.
@@ -142,7 +144,7 @@ class TableViewDiffCalculator<T: Equatable> {
 
 ---
 
-# Now what?
+# 2016: Maturity
 ### (Alternate slide title: Dwifft diff)
 
 ^ OK, so now it's about a year and a half later - what's happening with Dwifft?
@@ -212,6 +214,7 @@ ArrayDiff<S, T>
 ---
 
 # To 1.0
+### (a.k.a. Death)
 
 - ~~`sectionsAndRows`~~
 - Coalesce delete/insert operations into moves
